@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional
 public interface RsEventRepository extends CrudRepository<RsEventDto, Integer> {
   List<RsEventDto> findAll();
 
