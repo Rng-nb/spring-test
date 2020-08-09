@@ -3,6 +3,7 @@ package com.thoughtworks.rslist.service;
 import com.thoughtworks.rslist.domain.Trade;
 import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.RsEventDto;
+import com.thoughtworks.rslist.dto.TradeDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.RsEventRepository;
@@ -12,15 +13,20 @@ import com.thoughtworks.rslist.repository.VoteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class RsServiceTest {
   RsService rsService;
@@ -92,5 +98,25 @@ class RsServiceTest {
         () -> {
           rsService.vote(vote, 1);
         });
+  }
+
+  @Test
+  void shouldBuySuccess() {
+    UserDto userDto = UserDto.builder().voteNum(5).phone("18888888888").gender("female").email("a@b.com").age(19).userName("xiaoli").id(2).build();
+    RsEventDto rsEventDto = RsEventDto.builder().eventName("event name").id(1).keyword("keyword").voteNum(2).user(userDto).build();
+    List<TradeDto> tradeDtoList = new ArrayList<TradeDto>();
+    TradeDto tradeDto = TradeDto.builder().rsEventDto(rsEventDto).amount(80).rank(1).build();
+    tradeDtoList.add(tradeDto);
+    Trade trade = Trade.builder()
+            .amount(80)
+            .rank(1)
+            .build();
+    when(tradeRepository.findAllByRank(anyInt())).thenReturn(tradeDtoList);
+    when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto));
+    // when
+    rsService.buy(trade, 1);
+    // then
+    verify(tradeRepository).save(tradeDto);
+    verify(rsEventRepository).save(rsEventDto);
   }
 }

@@ -22,8 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -44,9 +43,26 @@ public class RsController {
                         .eventName(item.getEventName())
                         .keyword(item.getKeyword())
                         .userId(item.getId())
-                        .voteNum(item.getVoteNum())
+                        .voteNum(item.getVoteNum()).rank(item.getRank())
                         .build())
             .collect(Collectors.toList());
+    List<RsEvent> hotRsEvent = rsEvents.stream().filter(item -> item.getRank() == 0).collect(Collectors.toList());
+    List<RsEvent> buyRsEvent = rsEvents.stream().filter(item -> item.getRank() != 0).collect(Collectors.toList());
+    Collections.sort(hotRsEvent, new Comparator<RsEvent>() {
+      @Override
+      public int compare(RsEvent rs1, RsEvent rs2) {
+        if(rs1.getVoteNum() > rs2.getVoteNum()) {
+          return -1;
+        } else if(rs1.getVoteNum() < rs2.getVoteNum()) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    });
+    for(RsEvent rsEvent : buyRsEvent) {
+      hotRsEvent.add(rsEvent.getRank() -1, rsEvent);
+    }
     if (start == null || end == null) {
       return ResponseEntity.ok(rsEvents);
     }

@@ -69,12 +69,11 @@ public class RsService {
     rsEventRepository.save(rsEventDto);
     TradeDto tradeDto = TradeDto.builder().rank(trade.getRank()).amount(trade.getAmount()).rsEventDto(rsEventRepository.findById(id).get()).build();
     tradeDto = tradeRepository.save(tradeDto);
-    rsEventRepository.save(rsEventRepository.findById(id).get());
+
     for (int i = 0; i < tradeDtoList.size(); ++i) {
       if(rsEventRepository.findById(tradeDtoList.get(i).getRsEventDto().getId()).isPresent())
         rsEventRepository.deleteById(tradeDtoList.get(i).getRsEventDto().getId());
     }
-
     return true;
   }
 }
